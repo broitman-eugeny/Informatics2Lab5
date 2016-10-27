@@ -150,9 +150,9 @@ void ShowLevel(SimpleTree *PRoot, int ReqLevel, int Height, int TempLevel)
 			{
 				printf(" ");
 			}
-			for (int i = 0; i < DataPointersAmount; i++)//Печать значений вершины
+			for (int i = 0; i < DataPointersAmount; i++)//Печать пробелов чтобы сохранить симметрию
 			{
-				printf(FormatS, "*");
+				printf(FormatS, " ");
 				if (i < DataPointersAmount - 1)//Не последнее значение вершины
 				{
 					for (int j = 0; j < InSpaceChPlacesAmount; j++)
