@@ -99,6 +99,17 @@ void ShowTree(SimpleTree *PRoot)
 //TempLevel - текущий уровень (для поиска вершин печатаемого уровня)
 void ShowLevel(SimpleTree *PRoot, int ReqLevel, int Height, int TempLevel)
 {
+	char FormatS[5];
+	FormatS[0] = '%';
+	FormatS[1] = (ValChPlacesAmount>9) ? '0' + ValChPlacesAmount / 10 : '0' + ValChPlacesAmount;
+	FormatS[2] = (ValChPlacesAmount>9) ? '0' + ValChPlacesAmount % 10 : 's';
+	FormatS[3] = (ValChPlacesAmount>9) ? 's' : '\0';
+	FormatS[4] = '\0';
+	int SpacesBeforeNextNode = OutSpaceChPlacesAmount / 2,//Количество пробелов, которые нужно напечатать перед вершиной следующего уровня
+		SpacesAfterNextNode = OutSpaceChPlacesAmount - SpacesBeforeNextNode,//Количество пробелов, которые нужно напечатать после вершины следующего уровня
+		SpacesBeforeNode = SpacesBeforeNextNode,//Количество пробелов, которые нужно напечатать перед вершиной текущего уровня
+		SpacesAfterNode = SpacesAfterNextNode,//Количество пробелов, которые нужно напечатать после вершины текущего уровня
+		W = ValChPlacesAmount*DataPointersAmount + (DataPointersAmount - 1)*InSpaceChPlacesAmount;//Количество знакомест, занимаемых одной вершиной дерева
 	if (TempLevel < ReqLevel)//Пока не достигли требуемого уровня
 	{
 		if (PRoot != NULL)//Не достигли конца ветви
@@ -110,24 +121,83 @@ void ShowLevel(SimpleTree *PRoot, int ReqLevel, int Height, int TempLevel)
 		}
 		else//достигли конца ветви
 		{
-			ShowLevel(PRoot, ReqLevel, Height, TempLevel + 1);//Переход к следующему уровню со значением NULL
-															//для заполнения пустых вершин звездочками
+			if (ChildPointersAmount % 2 == 0)//Если количество потомков четное
+			{
+				for (int i = Height - 2; i >= TempLevel; i--)
+				{
+					SpacesBeforeNextNode = SpacesBeforeNode;
+					SpacesAfterNextNode = SpacesAfterNode;
+					//Количество пробелов, которые нужно напечатать перед вершиной
+					SpacesBeforeNode = ChildPointersAmount*(W + SpacesBeforeNextNode + SpacesAfterNextNode) / 2 - W / 2;
+					//Количество пробелов, которые нужно напечатать после вершины
+					SpacesAfterNode= SpacesBeforeNode+ W / 2-(W-W/2);//Т.к. W м.б. нечетным и W/2 < половины W
+				}
+			}
+			else//Если количество потомков нечетное
+			{
+				for (int i = Height - 2; i >= TempLevel; i--)
+				{
+					SpacesBeforeNextNode = SpacesBeforeNode;
+					SpacesAfterNextNode = SpacesAfterNode;
+					//Количество пробелов, которые нужно напечатать перед вершиной
+					SpacesBeforeNode = (ChildPointersAmount-1)*(W + SpacesBeforeNextNode + SpacesAfterNextNode) / 2 + SpacesBeforeNode;
+					//Количество пробелов, которые нужно напечатать после вершины
+					SpacesAfterNode = SpacesBeforeNode- SpacesBeforeNextNode+ SpacesAfterNextNode;
+				}
+			}
+			//Печать пробелов перед вершиной
+			for (int i = 0; i < SpacesBeforeNode; i++)
+			{
+				printf(" ");
+			}
+			for (int i = 0; i < DataPointersAmount; i++)//Печать значений вершины
+			{
+				printf(FormatS, "*");
+				if (i < DataPointersAmount - 1)//Не последнее значение вершины
+				{
+					for (int j = 0; j < InSpaceChPlacesAmount; j++)
+					{
+						printf(" ");//Пробелы между значениями одной вершины
+					}
+				}
+			}
+			//Печать пробелов после вершины
+			for (int i = 0; i < SpacesAfterNode; i++)
+			{
+				printf(" ");
+			}
 		}
 	}
 	else//Достигли требуемого уровня
 	{
-		int SpacesAmount = 1;//Количество пробелов между вершинами уровня вычисляется исходя из условия,
-		//что расстояния между значениями одной вершины == InSpaceChPlacesAmount, расстояния между вершинами
-		//нижнего уровня == OutSpaceChPlacesAmount. Вершины верхних уровней располагаются осесимметрично
-		//относительно соответствующих вершин нижнего уровня
-		for (int i = 1; i < Height - ReqLevel; i++)
+		if (ChildPointersAmount % 2 == 0)//Если количество потомков четное
 		{
-			SpacesAmount *= ChildPointersAmount;//Число потомков в степени (^) (высота дерева-уровень-1)
+			for (int i = Height - 2; i >= TempLevel; i--)
+			{
+				SpacesBeforeNextNode = SpacesBeforeNode;
+				SpacesAfterNextNode = SpacesAfterNode;
+				//Количество пробелов, которые нужно напечатать перед вершиной
+				SpacesBeforeNode = ChildPointersAmount*(W + SpacesBeforeNextNode + SpacesAfterNextNode) / 2 - W / 2;
+				//Количество пробелов, которые нужно напечатать после вершины
+				SpacesAfterNode = SpacesBeforeNode + W / 2 - (W - W / 2);//Т.к. W м.б. нечетным и W/2 < половины W
+			}
 		}
-		SpacesAmount = (SpacesAmount - 1)*(ValChPlacesAmount*DataPointersAmount + InSpaceChPlacesAmount*(DataPointersAmount - 1) + OutSpaceChPlacesAmount)+ OutSpaceChPlacesAmount;
-		for (int i = (SpacesAmount - OutSpaceChPlacesAmount) / 2; i > 0; i--)
+		else//Если количество потомков нечетное
 		{
-			printf(" ");//Половина пробелов перед вершиной
+			for (int i = Height - 2; i >= TempLevel; i--)
+			{
+				SpacesBeforeNextNode = SpacesBeforeNode;
+				SpacesAfterNextNode = SpacesAfterNode;
+				//Количество пробелов, которые нужно напечатать перед вершиной
+				SpacesBeforeNode = (ChildPointersAmount - 1)*(W + SpacesBeforeNextNode + SpacesAfterNextNode) / 2 + SpacesBeforeNode;
+				//Количество пробелов, которые нужно напечатать после вершины
+				SpacesAfterNode = SpacesBeforeNode - SpacesBeforeNextNode + SpacesAfterNextNode;
+			}
+		}
+		//Печать пробелов перед вершиной
+		for (int i = 0; i < SpacesBeforeNode; i++)
+		{
+			printf(" ");
 		}
 		char Format[5];
 		Format[0] = '%';
@@ -135,33 +205,35 @@ void ShowLevel(SimpleTree *PRoot, int ReqLevel, int Height, int TempLevel)
 		Format[2] = (ValChPlacesAmount>9) ? '0' + ValChPlacesAmount % 10 : 'd';
 		Format[3] = (ValChPlacesAmount>9) ? 'd' : '\0';
 		Format[4] = '\0';
-		for (int i = 0, N= DataPointersAmount - 1; i < N; i++)//Печать значений вершины исключая последнее
+		for (int i = 0; i < DataPointersAmount; i++)//Печать значений вершины
 		{
-			if (PRoot != NULL)
+			if (PRoot != NULL)//Вершина имеется (не конец ветви)
 			{
-				printf(Format, *(PRoot->PData[i]));
+				if (PRoot->PData[i] != NULL)//Если значение в вершине имеется
+				{
+					printf(Format, *(PRoot->PData[i]));
+				}
+				else
+				{
+					printf(FormatS, "*");//Нет значения в вершине
+				}
 			}
-			else
+			else//Нулевая вершина (конец ветви)
 			{
-				printf("*");//Нулевая вершина (конец ветви)
+				printf(FormatS, "*");
 			}
-			for (int j = 0; j < InSpaceChPlacesAmount; j++)
+			if (i < DataPointersAmount - 1)//Не последнее значение вершины
 			{
-				printf(" ");//Пробелы между значениями одной вершины
+				for (int j = 0; j < InSpaceChPlacesAmount; j++)
+				{
+					printf(" ");//Пробелы между значениями одной вершины
+				}
 			}
 		}
-		//Печать последнего значения вершины
-		if (PRoot != NULL)
+		//Печать пробелов после вершины
+		for (int i = 0; i < SpacesAfterNode; i++)
 		{
-			printf(Format, *(PRoot->PData[DataPointersAmount - 1]));
-		}
-		else
-		{
-			printf("*");//Нулевая вершина (конец ветви)
-		}
-		for (int i = (SpacesAmount - OutSpaceChPlacesAmount) / 2+ OutSpaceChPlacesAmount; i > 0; i--)
-		{
-			printf(" ");//Половина пробелов после вершины
+			printf(" ");
 		}
 	}
 }
@@ -210,8 +282,15 @@ SimpleTree * Array2NormTree(int *Array, int N, SimpleTree *PRoot, int &Index)
 		{
 			//Вычисляем индекс значения данных в массиве Array
 			NodeIndexes[i] = NodeIndexes[i - 1] + 1 + NodeIndexes[0];
-			//Записываем указатель на данные в вершину
-			PRoot[TempIndex].PData[i] = &(Array[NodeIndexes[i]]);
+			if (i <= N - 1)//Если индекс не превосходит максимально возможное значение на подучастке (есть элементы для записи)
+			{
+				//Записываем указатель на данные в вершину
+				PRoot[TempIndex].PData[i] = &(Array[NodeIndexes[i]]);
+			}
+			else//Элементы на подучастке закончились
+			{
+				PRoot[TempIndex].PData[i] = NULL;
+			}
 		}
 		int MaxChIndex = ChildPointersAmount - 1;//Максимальный индекс потомка одной вершины дерева
 		for (int i = 0; i < MaxChIndex; i++)//Для всех потомков, кроме последнего, т.к. в его поддереве может оказаться другое количество вершин

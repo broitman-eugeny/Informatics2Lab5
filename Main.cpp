@@ -47,7 +47,7 @@ void main()
 	int Index = 0;
 	Tree2Array(Array, &Node00, Index);//формирование массива из дерева
 	ShowArray(Array, NodesAmount*DataPointersAmount);
-	SimpleTree *PRoot = (SimpleTree *)malloc(sizeof(SimpleTree)*NodesAmount);
+	SimpleTree *PRoot = (SimpleTree *)malloc(sizeof(SimpleTree)*NodesAmount*DataPointersAmount);//Домножаем на DataPointersAmount, т.к. в вырожденном случае в вершине может оказаться всего одно значение данных
 	Index = 0;
 	Array2NormTree(Array, NodesAmount*DataPointersAmount, PRoot, Index);
 	ShowTree(PRoot);
