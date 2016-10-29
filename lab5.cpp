@@ -80,6 +80,31 @@ int TreeHeight(SimpleTree *PRoot)
 		return RightHeight + 1;
 	}
 }
+//Функция вычисляет минимальную длину ветви дерева с учетом веток к нулевым вершинам
+//PRoot - указатель на корень дерева
+int MinBranchLength(SimpleTree *PRoot)
+{
+	if (PRoot == NULL)//Дошли до конца ветви
+	{
+		return 0;
+	}
+	int LeftHeight, MidHeight, RightHeight;
+	LeftHeight = TreeHeight(PRoot->PChildren[0]);
+	MidHeight = TreeHeight(PRoot->PChildren[1]);
+	RightHeight = TreeHeight(PRoot->PChildren[2]);
+	if (LeftHeight <= MidHeight && LeftHeight <= RightHeight)
+	{
+		return LeftHeight + 1;
+	}
+	if (MidHeight <= LeftHeight && MidHeight <= RightHeight)
+	{
+		return MidHeight + 1;
+	}
+	else
+	{
+		return RightHeight + 1;
+	}
+}
 //Функция отображает дерево
 //PRoot - указатель на корень дерева
 void ShowTree(SimpleTree *PRoot)
@@ -248,9 +273,12 @@ void Tree2Array(int *Array, SimpleTree *PRoot, int &TempIndex)
 		for (int i = 0, N= ChildPointersAmount-1; i < N; i++)
 		{
 			Tree2Array(Array, PRoot->PChildren[i], TempIndex);
-			Array[TempIndex++] = *(PRoot->PData[i]);
+			if (PRoot->PData[i] != NULL)
+			{
+				Array[TempIndex++] = *(PRoot->PData[i]);
+			}
 		}
-		Tree2Array(Array, PRoot->PChildren[ChildPointersAmount - 1], TempIndex);
+		Tree2Array(Array, PRoot->PChildren[ChildPointersAmount - 1], TempIndex);//Т.к. за последним потомком в вершине нет данных
 	}
 }
 //Функция отображает массив int
@@ -313,4 +341,48 @@ SimpleTree * Array2NormTree(int *Array, int N, SimpleTree *PRoot, int &Index)
 	}
 	//Элементы на участке разбиения массива Array закончились
 	return NULL;
+}
+//Функция выводит на экран отчет по характеристикам сбалансированности дерева и трудоемкости балансировки
+//PRoot - массив корней деревьев.
+//TreesAmount - количество элементов в массиве PRoot
+void ShowLab5Report(SimpleTree **UnbalansedTrees, int TreesAmount)
+{
+	SetConsoleCP(1251);//Ввод русских букв
+	SetConsoleOutputCP(1251);//Вывод русских букв
+	for (int i = 0; i < TreesAmount; i++)
+	{
+		printf("\nНесбалансированное дерево %d",i);
+		ShowTree(UnbalansedTrees[i]);
+		printf("\nКоличество ветвей дерева: %d", TreeBranchesAmount(UnbalansedTrees[i]));
+		printf("\nСумма длин всех ветвей дерева: %d", BrunchLengthsSum(UnbalansedTrees[i], 0));
+		printf("\nСредняя длина ветви: %f", AverageBrunchLength(UnbalansedTrees[i]));
+		int NodesAmount = TreeNodesAmount(UnbalansedTrees[i]);//Количество вершин в дереве
+		printf("\nКоличество вершин дерева: %d", NodesAmount);
+		printf("\nМаксимальная длина ветви дерева: %d", TreeHeight(UnbalansedTrees[i]));
+		printf("\nМинимальная длина ветви дерева: %d", MinBranchLength(UnbalansedTrees[i]));
+		int *Array = (int *)malloc(sizeof(int)*NodesAmount*DataPointersAmount);
+		int Index = 0;
+		Tree2Array(Array, UnbalansedTrees[i], Index);//формирование массива из дерева
+		printf("\nЭлементы несбалансированного дерева %d в возрастающем порядке:", i);
+		ShowArray(Array, NodesAmount*DataPointersAmount);
+		SimpleTree *PRoot = (SimpleTree *)malloc(sizeof(SimpleTree)*NodesAmount*DataPointersAmount);//Домножаем на DataPointersAmount, т.к. в вырожденном случае в вершине может оказаться всего одно значение данных
+		int Time = clock();//мс, время с начала выполнения программы
+		for (int j = 0; j < 1000000; j++)
+		{
+			Index = 0;
+			Tree2Array(Array, UnbalansedTrees[i], Index);//формирование массива из дерева
+			//printf("\nЭлементы несбалансированного дерева %d в возрастающем порядке:", i);
+			//ShowArray(Array, NodesAmount*DataPointersAmount);
+			Index = 0;
+			Array2NormTree(Array, NodesAmount*DataPointersAmount, PRoot, Index);
+		}
+		Time = clock() - Time;
+		printf("\nСбалансированное дерево %d", i);
+		ShowTree(PRoot);
+		printf("\nВремя балансировки: %d нс", Time);
+		printf("\n");
+		system("pause");
+		free(PRoot);
+		free(Array);
+	}	
 }

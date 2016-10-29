@@ -35,6 +35,9 @@ int TreeNodesAmount(SimpleTree *PRoot);
 int TreeHeight(SimpleTree *PRoot);
 //Функция отображает дерево
 //PRoot - указатель на корень дерева
+//Функция вычисляет минимальную длину ветви дерева с учетом веток к нулевым вершинам
+//PRoot - указатель на корень дерева
+int MinBranchLength(SimpleTree *PRoot);
 void ShowTree(SimpleTree *PRoot);
 //Функция отображает один уровень дерева
 //PRoot - указатель на корень дерева
@@ -58,3 +61,7 @@ void ShowArray(int *Array, int N);
 //Index - индекс текущего заполняемого элемента в массиве PRoot
 //Возвращает индекс в массиве SimpleTree сформированной вершины дерева
 SimpleTree * Array2NormTree(int *Array, int N, SimpleTree *PRoot, int &Index);
+//Функция выводит на экран отчет по характеристикам сбалансированности дерева и трудоемкости балансировки
+//PRoot - массив корней деревьев.
+//TreesAmount - количество элементов в массиве PRoot
+void ShowLab5Report(SimpleTree **UnbalansedTrees, int TreesAmount);
