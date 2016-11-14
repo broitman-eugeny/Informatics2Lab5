@@ -36,9 +36,9 @@ void main()
 	SimpleTree Node121 = { { &Keys[7], &Keys[8] },{ &Node131,NULL,&Node132 } };// -//-
 	//1-й уровень дерева 1
 	SimpleTree Node110 = { { &Keys[4], &Keys[11] },{ &Node120,&Node121,NULL } };//Потомок вершины Node100
-	SimpleTree Node111 = { { &Keys[14], &Keys[15] },{ NULL,NULL,NULL } };// -//-
+	SimpleTree Node111 = { { &Keys[13], &Keys[14] },{ NULL,NULL,NULL } };// -//-
 	//0-й уровень дерева 1
-	SimpleTree Node100 = { { &Keys[13], &Keys[16] },{ &Node110,&Node111,NULL } };//Корень
+	SimpleTree Node100 = { { &Keys[12], &Keys[15] },{ &Node110,&Node111,NULL } };//Корень
 	//4-й уровень дерева 2
 	SimpleTree Node240 = { { &Keys[5], &Keys[6] },{ NULL,NULL,NULL } };//Потомок вершины Node231
 	SimpleTree Node241 = { { &Keys[8], &Keys[9] },{ NULL,NULL,NULL } };// -//-

@@ -15,8 +15,8 @@ int TreeBranchesAmount(SimpleTree *PRoot)
 	return BranchesAmount;
 }
 //Функция вычисления суммы длин всех ветвей дерева.
-//PRoot - указатель на корень дерева
-//Level - уровень корня дерева - 0
+//PRoot - указатель на корень (вершину) дерева
+//Level - уровень корня (вершины) дерева - 0
 int BrunchLengthsSum(SimpleTree *PRoot, int Level)
 {
 	if (PRoot == NULL)//Дошли до конца ветви
@@ -63,22 +63,27 @@ int TreeHeight(SimpleTree *PRoot)
 	{
 		return 0;
 	}
-	int LeftHeight, MidHeight, RightHeight;
-	LeftHeight = TreeHeight(PRoot->PChildren[0]);
-	MidHeight = TreeHeight(PRoot->PChildren[1]);
-	RightHeight = TreeHeight(PRoot->PChildren[2]);
-	if (LeftHeight >= MidHeight && LeftHeight >= RightHeight)
+	int Heights[ChildPointersAmount];
+	for (int i = 0; i < ChildPointersAmount; i++)//По всем потомкам корня
 	{
-		return LeftHeight + 1;
+		Heights[i] = TreeHeight(PRoot->PChildren[i]);
 	}
-	if(MidHeight >= LeftHeight && MidHeight >= RightHeight)
+	return Heights[MaxInt(Heights, ChildPointersAmount)]+1;
+}
+//Функция возвращает индекс максимального целочисленного значения в массиве
+//Dim - массив целых чисел
+//N - размер массива
+int MaxInt(int *Dim, int N)
+{
+	int MaxInd = 0;
+	for (int i = 1; i < N; i++)
 	{
-		return MidHeight + 1;
+		if (Dim[i] > Dim[MaxInd])
+		{
+			MaxInd = i;
+		}
 	}
-	else
-	{
-		return RightHeight + 1;
-	}
+	return MaxInd;
 }
 //Функция вычисляет минимальную длину ветви дерева с учетом веток к нулевым вершинам
 //PRoot - указатель на корень дерева
@@ -88,22 +93,27 @@ int MinBranchLength(SimpleTree *PRoot)
 	{
 		return 0;
 	}
-	int LeftHeight, MidHeight, RightHeight;
-	LeftHeight = TreeHeight(PRoot->PChildren[0]);
-	MidHeight = TreeHeight(PRoot->PChildren[1]);
-	RightHeight = TreeHeight(PRoot->PChildren[2]);
-	if (LeftHeight <= MidHeight && LeftHeight <= RightHeight)
+	int Heights[ChildPointersAmount];
+	for (int i = 0; i < ChildPointersAmount; i++)//По всем потомкам корня
 	{
-		return LeftHeight + 1;
+		Heights[i] = TreeHeight(PRoot->PChildren[i]);
 	}
-	if (MidHeight <= LeftHeight && MidHeight <= RightHeight)
+	return Heights[MinInt(Heights, ChildPointersAmount)] + 1;
+}
+//Функция возвращает индекс минимального целочисленного значения в массиве
+//Dim - массив целых чисел
+//N - размер массива
+int MinInt(int *Dim, int N)
+{
+	int MinInd = 0;
+	for (int i = 1; i < N; i++)
 	{
-		return MidHeight + 1;
+		if (Dim[i] < Dim[MinInd])
+		{
+			MinInd = i;
+		}
 	}
-	else
-	{
-		return RightHeight + 1;
-	}
+	return MinInd;
 }
 //Функция отображает дерево
 //PRoot - указатель на корень дерева
@@ -130,10 +140,10 @@ void ShowLevel(SimpleTree *PRoot, int ReqLevel, int Height, int TempLevel)
 	FormatS[2] = (ValChPlacesAmount>9) ? '0' + ValChPlacesAmount % 10 : 's';
 	FormatS[3] = (ValChPlacesAmount>9) ? 's' : '\0';
 	FormatS[4] = '\0';
-	int SpacesBeforeNextNode = OutSpaceChPlacesAmount / 2,//Количество пробелов, которые нужно напечатать перед вершиной следующего уровня
-		SpacesAfterNextNode = OutSpaceChPlacesAmount - SpacesBeforeNextNode,//Количество пробелов, которые нужно напечатать после вершины следующего уровня
-		SpacesBeforeNode = SpacesBeforeNextNode,//Количество пробелов, которые нужно напечатать перед вершиной текущего уровня
-		SpacesAfterNode = SpacesAfterNextNode,//Количество пробелов, которые нужно напечатать после вершины текущего уровня
+	int Temp1 = OutSpaceChPlacesAmount / 2,//Временная переменная 1
+		Temp2 = OutSpaceChPlacesAmount - Temp1,//Временная переменная 2
+		SpacesBeforeNode = Temp1,//Количество пробелов, которые нужно напечатать перед вершиной текущего уровня
+		SpacesAfterNode = Temp2,//Количество пробелов, которые нужно напечатать после вершины текущего уровня
 		W = ValChPlacesAmount*DataPointersAmount + (DataPointersAmount - 1)*InSpaceChPlacesAmount;//Количество знакомест, занимаемых одной вершиной дерева
 	if (TempLevel < ReqLevel)//Пока не достигли требуемого уровня
 	{
@@ -144,16 +154,16 @@ void ShowLevel(SimpleTree *PRoot, int ReqLevel, int Height, int TempLevel)
 				ShowLevel(PRoot->PChildren[i], ReqLevel, Height, TempLevel + 1);//Переход к следующему уровню
 			}
 		}
-		else//достигли конца ветви
+		else//достигли конца ветви. Необходимо напечатать пробелы в запрашиваемом уровне (текстовый курсор находится в запрашиваемом уровне), чтобы восполнить отсутствующие элементы из-за нулевых вершин в текущем уровне и сохранить симметрию дерева
 		{
 			if (ChildPointersAmount % 2 == 0)//Если количество потомков четное
 			{
 				for (int i = Height - 2; i >= TempLevel; i--)
 				{
-					SpacesBeforeNextNode = SpacesBeforeNode;
-					SpacesAfterNextNode = SpacesAfterNode;
+					Temp1 = SpacesBeforeNode;//Значение со следующего уровня
+					Temp2 = SpacesAfterNode;//Значение со следующего уровня
 					//Количество пробелов, которые нужно напечатать перед вершиной
-					SpacesBeforeNode = ChildPointersAmount*(W + SpacesBeforeNextNode + SpacesAfterNextNode) / 2 - W / 2;
+					SpacesBeforeNode = ChildPointersAmount*(W + Temp1 + Temp2) / 2 - W / 2;
 					//Количество пробелов, которые нужно напечатать после вершины
 					SpacesAfterNode= SpacesBeforeNode+ W / 2-(W-W/2);//Т.к. W м.б. нечетным и W/2 < половины W
 				}
@@ -162,12 +172,12 @@ void ShowLevel(SimpleTree *PRoot, int ReqLevel, int Height, int TempLevel)
 			{
 				for (int i = Height - 2; i >= TempLevel; i--)
 				{
-					SpacesBeforeNextNode = SpacesBeforeNode;
-					SpacesAfterNextNode = SpacesAfterNode;
+					Temp1 = SpacesBeforeNode;//Значение со следующего уровня
+					Temp2 = SpacesAfterNode;//Значение со следующего уровня
 					//Количество пробелов, которые нужно напечатать перед вершиной
-					SpacesBeforeNode = (ChildPointersAmount-1)*(W + SpacesBeforeNextNode + SpacesAfterNextNode) / 2 + SpacesBeforeNode;
+					SpacesBeforeNode = (ChildPointersAmount-1)*(W + Temp1 + Temp2) / 2 + Temp1;
 					//Количество пробелов, которые нужно напечатать после вершины
-					SpacesAfterNode = SpacesBeforeNode- SpacesBeforeNextNode+ SpacesAfterNextNode;
+					SpacesAfterNode = SpacesBeforeNode- Temp1+ Temp2;
 				}
 			}
 			//Печать пробелов перед вершиной
@@ -199,10 +209,10 @@ void ShowLevel(SimpleTree *PRoot, int ReqLevel, int Height, int TempLevel)
 		{
 			for (int i = Height - 2; i >= TempLevel; i--)
 			{
-				SpacesBeforeNextNode = SpacesBeforeNode;
-				SpacesAfterNextNode = SpacesAfterNode;
+				Temp1 = SpacesBeforeNode;
+				Temp2 = SpacesAfterNode;
 				//Количество пробелов, которые нужно напечатать перед вершиной
-				SpacesBeforeNode = ChildPointersAmount*(W + SpacesBeforeNextNode + SpacesAfterNextNode) / 2 - W / 2;
+				SpacesBeforeNode = ChildPointersAmount*(W + Temp1 + Temp2) / 2 - W / 2;
 				//Количество пробелов, которые нужно напечатать после вершины
 				SpacesAfterNode = SpacesBeforeNode + W / 2 - (W - W / 2);//Т.к. W м.б. нечетным и W/2 < половины W
 			}
@@ -211,12 +221,12 @@ void ShowLevel(SimpleTree *PRoot, int ReqLevel, int Height, int TempLevel)
 		{
 			for (int i = Height - 2; i >= TempLevel; i--)
 			{
-				SpacesBeforeNextNode = SpacesBeforeNode;
-				SpacesAfterNextNode = SpacesAfterNode;
+				Temp1 = SpacesBeforeNode;
+				Temp2 = SpacesAfterNode;
 				//Количество пробелов, которые нужно напечатать перед вершиной
-				SpacesBeforeNode = (ChildPointersAmount - 1)*(W + SpacesBeforeNextNode + SpacesAfterNextNode) / 2 + SpacesBeforeNode;
+				SpacesBeforeNode = (ChildPointersAmount - 1)*(W + Temp1 + Temp2) / 2 + Temp1;
 				//Количество пробелов, которые нужно напечатать после вершины
-				SpacesAfterNode = SpacesBeforeNode - SpacesBeforeNextNode + SpacesAfterNextNode;
+				SpacesAfterNode = SpacesBeforeNode - Temp1 + Temp2;
 			}
 		}
 		//Печать пробелов перед вершиной
@@ -297,7 +307,7 @@ void ShowArray(int *Array, int N)
 //N - количество элементов в массиве Array
 //PRoot - указатель на корень дерева. Дерево располагается в массиве типа SimpleTree, нулевой элемент которого - корень
 //Index - индекс текущего заполняемого элемента в массиве PRoot
-//Возвращает индекс в массиве SimpleTree сформированной вершины дерева
+//Возвращает указатель на сформированную вершину дерева в массиве PRoot
 SimpleTree * Array2NormTree(int *Array, int N, SimpleTree *PRoot, int &Index)
 {
 	if (N > 0)//Элементы на участке разбиения есть
@@ -343,46 +353,59 @@ SimpleTree * Array2NormTree(int *Array, int N, SimpleTree *PRoot, int &Index)
 	return NULL;
 }
 //Функция выводит на экран отчет по характеристикам сбалансированности дерева и трудоемкости балансировки
-//PRoot - массив корней деревьев.
-//TreesAmount - количество элементов в массиве PRoot
-void ShowLab5Report(SimpleTree **UnbalansedTrees, int TreesAmount)
+//UnbalancedTrees - массив корней деревьев.
+//TreesAmount - количество элементов в массиве UnbalancedTrees
+void ShowLab5Report(SimpleTree **UnbalancedTrees, int TreesAmount)
 {
+	int *NodesAmount;
+	int *Time;
+	NodesAmount = (int*)malloc(sizeof(int)*TreesAmount);
+	Time = (int*)malloc(sizeof(int)*TreesAmount);
 	SetConsoleCP(1251);//Ввод русских букв
 	SetConsoleOutputCP(1251);//Вывод русских букв
 	for (int i = 0; i < TreesAmount; i++)
 	{
 		printf("\nНесбалансированное дерево %d",i);
-		ShowTree(UnbalansedTrees[i]);
-		printf("\nКоличество ветвей дерева: %d", TreeBranchesAmount(UnbalansedTrees[i]));
-		printf("\nСумма длин всех ветвей дерева: %d", BrunchLengthsSum(UnbalansedTrees[i], 0));
-		printf("\nСредняя длина ветви: %f", AverageBrunchLength(UnbalansedTrees[i]));
-		int NodesAmount = TreeNodesAmount(UnbalansedTrees[i]);//Количество вершин в дереве
-		printf("\nКоличество вершин дерева: %d", NodesAmount);
-		printf("\nМаксимальная длина ветви дерева: %d", TreeHeight(UnbalansedTrees[i]));
-		printf("\nМинимальная длина ветви дерева: %d", MinBranchLength(UnbalansedTrees[i]));
-		int *Array = (int *)malloc(sizeof(int)*NodesAmount*DataPointersAmount);
+		ShowTree(UnbalancedTrees[i]);
+		printf("\nКоличество ветвей дерева: %d", TreeBranchesAmount(UnbalancedTrees[i]));
+		printf("\nСумма длин всех ветвей дерева: %d", BrunchLengthsSum(UnbalancedTrees[i], 0));
+		printf("\nСредняя длина ветви: %f", AverageBrunchLength(UnbalancedTrees[i]));
+		NodesAmount[i] = TreeNodesAmount(UnbalancedTrees[i]);//Количество вершин в дереве
+		printf("\nКоличество вершин дерева: %d", NodesAmount[i]);
+		printf("\nМаксимальная длина ветви дерева: %d", TreeHeight(UnbalancedTrees[i]));
+		printf("\nМинимальная длина ветви дерева: %d", MinBranchLength(UnbalancedTrees[i]));
+		int *Array = (int *)malloc(sizeof(int)*NodesAmount[i]*DataPointersAmount);
 		int Index = 0;
-		Tree2Array(Array, UnbalansedTrees[i], Index);//формирование массива из дерева
+		Tree2Array(Array, UnbalancedTrees[i], Index);//формирование массива из дерева
 		printf("\nЭлементы несбалансированного дерева %d в возрастающем порядке:", i);
-		ShowArray(Array, NodesAmount*DataPointersAmount);
-		SimpleTree *PRoot = (SimpleTree *)malloc(sizeof(SimpleTree)*NodesAmount*DataPointersAmount);//Домножаем на DataPointersAmount, т.к. в вырожденном случае в вершине может оказаться всего одно значение данных
-		int Time = clock();//мс, время с начала выполнения программы
+		ShowArray(Array, NodesAmount[i]*DataPointersAmount);
+		SimpleTree *PRoot = (SimpleTree *)malloc(sizeof(SimpleTree)*NodesAmount[i]*DataPointersAmount);//Домножаем на DataPointersAmount, т.к. в вырожденном случае в вершине может оказаться всего одно значение данных
+		Time[i] = clock();//мс, время с начала выполнения программы
 		for (int j = 0; j < 1000000; j++)
 		{
 			Index = 0;
-			Tree2Array(Array, UnbalansedTrees[i], Index);//формирование массива из дерева
+			Tree2Array(Array, UnbalancedTrees[i], Index);//формирование массива из дерева
 			//printf("\nЭлементы несбалансированного дерева %d в возрастающем порядке:", i);
 			//ShowArray(Array, NodesAmount*DataPointersAmount);
 			Index = 0;
-			Array2NormTree(Array, NodesAmount*DataPointersAmount, PRoot, Index);
+			Array2NormTree(Array, NodesAmount[i]*DataPointersAmount, PRoot, Index);
 		}
-		Time = clock() - Time;
+		Time[i] = clock() - Time[i];
 		printf("\nСбалансированное дерево %d", i);
 		ShowTree(PRoot);
-		printf("\nВремя балансировки: %d нс", Time);
+		printf("\nВремя балансировки: %d нс", Time[i]);
 		printf("\n");
 		system("pause");
 		free(PRoot);
 		free(Array);
-	}	
+	}
+	printf("Сводный результат:\n");
+	printf("Количество элементов дерева\tВремя балансировки, нс\n");
+	for (int i = 0; i < TreesAmount; i++)
+	{
+		printf("%d\t\t\t\t%d\n",NodesAmount[i], Time[i]);
+	}
+	free(NodesAmount);
+	free(Time);
+	system("pause");
 }
